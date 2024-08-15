@@ -6,7 +6,7 @@ const http = require('http');
 const server = http.createServer(app);
 
 const { Server } = require('socket.io');
-const { addUser } = require('./utils/users');
+const { addUser, getUsersInRoom } = require('./utils/users');
 const { generateMessage } = require('./utils/message');
 const io = new Server(server);
 
@@ -15,6 +15,7 @@ io.on('connection', (socket) => {
   console.log(`${socketId} - New client connected`);
 
   socket.on('join', (options, callback) => {
+    console.log('options', options);
     const socketId = socket.id.substring(0, 6);
     const { error, user } = addUser({ id: socketId, ...options });
     if (error) {
