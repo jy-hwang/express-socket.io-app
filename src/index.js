@@ -7,6 +7,7 @@ const server = http.createServer(app);
 
 const { Server } = require('socket.io');
 const { addUser } = require('./utils/users');
+const { generateMessage } = require('./utils/message');
 const io = new Server(server);
 
 io.on('connection', (socket) => {
@@ -20,9 +21,25 @@ io.on('connection', (socket) => {
       return callback(error);
     }
     socket.join(user.room);
+
+    socket.emit(
+      'message',
+      generateMessage('Admin', `${user.room} 방에 오신 것을 환영합니다`)
+    );
+    socket.broadcast
+      .to(user.room)
+      .emit(
+        'message',
+        generateMessage('', `${user.username} 님이 방에 참여했습니다.`)
+      );
+
+    io.to(user.room).emit('roomData', {
+      room: user.room,
+      users: getUsersInRoom(user.room),
+    });
   });
 
-  socket.on('message', () => {});
+  socket.on('sendMessage', () => {});
 
   socket.on('disconnect', () => {
     console.log(`${socketId} - client Disconnected`);
