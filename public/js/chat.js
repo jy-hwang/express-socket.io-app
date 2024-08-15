@@ -22,5 +22,18 @@ socket.on('roomData', ({ room, users }) => {
   });
   document.querySelector('#sidebar').innerHTML = html;
 });
+const messages = document.querySelector('#messages');
+const messageTemplate = document.querySelector('#message-template').innerHTML;
+socket.on('message', (message) => {
+  const html = Mustache.render(messageTemplate, {
+    username: message.username,
+    message: message.text,
+    createdAt: moment(message.createdAt).format('h:mm a'),
+    //createdAt: message.createdAt,
+  });
+  messages.insertAdjacentHTML('beforeend', html);
+});
 
-socket.on('message');
+function scrollToBottom() {
+  messages.scrollTop = messages.scrollHeight;
+}

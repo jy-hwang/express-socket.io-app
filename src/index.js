@@ -21,12 +21,16 @@ io.on('connection', (socket) => {
     if (error) {
       return callback(error);
     }
+
+    console.log('user : ', user);
+
     socket.join(user.room);
 
     socket.emit(
       'message',
       generateMessage('Admin', `${user.room} 방에 오신 것을 환영합니다`)
     );
+
     socket.broadcast
       .to(user.room)
       .emit(
