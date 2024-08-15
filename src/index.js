@@ -6,7 +6,12 @@ const http = require('http');
 const server = http.createServer(app);
 
 const { Server } = require('socket.io');
-const { addUser, getUsersInRoom, getUser } = require('./utils/users');
+const {
+  addUser,
+  getUsersInRoom,
+  getUser,
+  removeUser,
+} = require('./utils/users');
 const { generateMessage } = require('./utils/message');
 const io = new Server(server);
 
@@ -34,7 +39,7 @@ io.on('connection', (socket) => {
       .to(user.room)
       .emit(
         'message',
-        generateMessage('', `${user.username} 님이 방에 참여했습니다.`)
+        generateMessage('Admin', `${user.username} 님이 방에 참여했습니다.`)
       );
 
     io.to(user.room).emit('roomData', {
@@ -51,6 +56,18 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log(`${socketId} - client Disconnected`);
+    const user = removeUser(socketId);
+
+    if (user) {
+      io.to(user.room).emit(
+        'message',
+        generateMessage('Admin', `${user.username} 님이 방을 나갔습니다.`)
+      );
+      io.to(user.room).emit('roomData', {
+        room: user.room,
+        users: getUsersInRoom(user.room),
+      });
+    }
   });
 });
 
